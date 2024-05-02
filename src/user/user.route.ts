@@ -18,8 +18,6 @@ export default class UserRouter {
     const userRepository = new UserRepository(this.client, this.logger)
     const userService = new UserService(userRepository, this.logger)
     const userController = new UserController(this.route, userService, this.logger)
-    const userRouter = new MyRouter().Register(userController).instance
-
-    return router.use('/users', verifyToken, userRouter)
+    return router.use('/', verifyToken, new MyRouter().Register(userController).instance)
   }
 }

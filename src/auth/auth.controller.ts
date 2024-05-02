@@ -48,23 +48,17 @@ export class AuthController {
       }
     })
 
-  //   async register(req, res) {
-  //     const { email, password, name } = req.body
-  //     const user = await this.authModel.register(email, password, name)
-  //     res.json(user)
-  //   }
-
   register = this.route
-  .post('/register')
-  .body(UserSchema)
-  .handler(async ({ body }) => {
-    const ctx = Context.get()
-    const logger = this.logger.Logger(ctx)
-    logger.info(`${AuthController.name} - ${this.register.method}`)
-    const result = await this.authService.register(ctx, body)
-    return {
-      message: 'User created',
-      data: result,
-    }
-  })
+    .post('/register')
+    .body(UserSchema)
+    .handler(async ({ body }) => {
+      const ctx = Context.get()
+      const logger = this.logger.Logger(ctx)
+      logger.info(`${AuthController.name} - ${this.register.method}`)
+      const result = await this.authService.register(ctx, body)
+      return {
+        message: 'User created',
+        data: result,
+      }
+    })
 }

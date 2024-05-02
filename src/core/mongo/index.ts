@@ -1,22 +1,26 @@
 import { Collection, MongoClient } from 'mongodb'
-import { logger } from '../logger/utils'
+import Logger from '../logger/index.js'
 const url =
   'bW9uZ29kYjovL0RFVl9VU0VSOkMzQkFENTYyLTg5NjgtNENENC05MENFLTQzQjZFMEJBMjM2MkBsb2NhbGhvc3Q6MjcwMTcvdG9kbz9hdXRoU291cmNlPWFkbWlu'
 
 export default class MongoService {
   private client: MongoClient
 
-  constructor() {
+  constructor(private readonly logger: Logger) {
     const buf = Buffer.from(url, 'base64')
     const uri = buf.toString('utf-8')
     this.client = new MongoClient(uri)
-    this.client.on('connect', async () => {
-      logger.info('MongoDB connected')
+    this.client.on('connect', () => {
+      this.logger.info('MongoDB connected')
     })
   }
 
   async connect() {
-    await this.client.connect()
+    const conn = await this.client.connect()
+    this.logger.info('MongoDB connected', {
+      eventNames: conn.eventNames(),
+      options: conn.options,
+    })
   }
 
   async disconnect() {
@@ -30,13 +34,4 @@ export default class MongoService {
   getCollection<T extends object>(collection: string = 'users'): Collection<T> {
     return this.client.db('users').collection(collection)
   }
-}
-
-export async function connectDB() {
-  const buf = Buffer.from(url, 'base64')
-  const uri = buf.toString('utf-8')
-  const client = new MongoClient(uri)
-  await client.connect()
-
-  return client
 }

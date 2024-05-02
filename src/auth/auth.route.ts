@@ -19,8 +19,6 @@ export default class AuthRouter {
     const authRepository: UserRepository = new UserRepository(this.client, this.logger)
     const authService = new AuthService(authRepository, this.redisClient, this.logger)
     const authController = new AuthController(this.route, authService, this.logger)
-    const authRouter = new MyRouter().Register(authController).instance
-
-    return router.use('/auth', authRouter)
+    return router.use('/auth', new MyRouter().Register(authController).instance)
   }
 }

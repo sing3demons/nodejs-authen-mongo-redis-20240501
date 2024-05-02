@@ -31,7 +31,7 @@ export class MyRouter {
       if (route.__handlerMetadata) {
         const { path, handler } = route
         const method = route.method.toLowerCase()
-        logger.info('Registering route', { method, path })
+        logger.info(`${classInstance.constructor.name}_${method.toUpperCase()} ${path}`)
         ;(this.instance.route(path) as any)[method](this.preRequest(handler))
       }
     })
