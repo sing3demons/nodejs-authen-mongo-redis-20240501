@@ -23,25 +23,11 @@ enum HttpMethod {
 }
 
 export class TypeRoute {
-  get(path: string) {
-    return new TypedRouteHandler(path, HttpMethod.GET)
-  }
-
-  post(path: string) {
-    return new TypedRouteHandler(path, HttpMethod.POST)
-  }
-
-  put(path: string) {
-    return new TypedRouteHandler(path, HttpMethod.PUT)
-  }
-
-  delete(path: string) {
-    return new TypedRouteHandler(path, HttpMethod.DELETE)
-  }
-
-  patch(path: string) {
-    return new TypedRouteHandler(path, HttpMethod.PATCH)
-  }
+  get = (path: string) => new TypedRouteHandler(path, HttpMethod.GET)
+  post = (path: string) => new TypedRouteHandler(path, HttpMethod.POST)
+  put = (path: string) => new TypedRouteHandler(path, HttpMethod.PUT)
+  delete = (path: string) => new TypedRouteHandler(path, HttpMethod.DELETE)
+  patch = (path: string) => new TypedRouteHandler(path, HttpMethod.PATCH)
 }
 
 export type TypedHandler<
@@ -62,7 +48,11 @@ export class TypedRouteHandler<
   RouteParams extends z.ZodTypeAny,
   RouteBody extends z.ZodTypeAny
 > {
-  private schema: { query?: z.ZodTypeAny; params?: z.ZodTypeAny; body?: z.ZodTypeAny } = {}
+  private schema: {
+    query?: z.ZodTypeAny
+    params?: z.ZodTypeAny
+    body?: z.ZodTypeAny
+  } = {}
   constructor(private readonly path: string, private readonly method: string) {}
 
   query<Query extends z.ZodTypeAny>(schema: Query) {
