@@ -20,6 +20,7 @@ export class UserRepository {
     const logger = this.logger.Logger(ctx)
     logger.info(`${UserRepository.name} - ${this.find.name}`)
     filter = { ...filter, deleteDate: null }
+    console.log('=========================================', filter)
     return await this.getCollection<IUserResponse>('users').find(filter, options).toArray()
   }
 

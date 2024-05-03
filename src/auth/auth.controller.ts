@@ -20,7 +20,7 @@ export class AuthController {
       const ctx = Context.get()
       const logger = this.logger.Logger(ctx)
       const cmd = `${AuthController.name}_${this.login.method}`
-      logger.info(`${cmd}`)
+      logger.info(`${cmd}`, body)
       const { email, password } = body
       const { access_token, refresh_token } = await this.authService.login(ctx, email, password)
       return {
