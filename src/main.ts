@@ -29,6 +29,8 @@ async function main() {
   await mongoService.connect()
   await redisClient.connect()
 
+  // await mongoService.userCollection()
+
   const client = mongoService.getClient()
   app.get('/healthz', (_req, res) => res.status(200).json('OK'))
   app.use('/', Register(route, client, redisClient, logger))

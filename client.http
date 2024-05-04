@@ -43,4 +43,23 @@ Authorization: Bearer {{refreshToken}}
 {
     "token": "{{refreshToken}}"
 }
- 
+
+###
+PATCH {{host}}/users/profile/0f6a30ad-a4ef-4a9d-b968-8190b840375b  HTTP/1.1
+Content-Type: application/json
+Authorization : Bearer {{accessToken}}
+
+{
+    "languages": [
+        {
+            "languageCode": "en",
+            "name": "kumneung panthong",
+            "description": "sing"
+        },
+        {
+            "languageCode": "th",
+            "name": "คำนึง พันธ์ทอง",
+            "description": "สิงห์"
+        }
+    ]
+}

@@ -11,12 +11,15 @@ class Config {
     refreshPublicKey?: string | undefined
   }
 
-
+  mongo_url: string
 
   constructor() {
     this.port = process.env.PORT ?? 3000
     this.host = process.env.HOST_IP ?? ip.address()
     this.redis_url = process.env.REDIS_URL ?? `redis://${ip.address()}:6379`
+    this.mongo_url =
+      process.env.MONGO_URL ??
+      'bW9uZ29kYjovL21vbmdvZGIxOjI3MDE3LG1vbmdvZGIyOjI3MDE4LG1vbmdvZGIzOjI3MDE5L3VzZXJzP3JlcGxpY2FTZXQ9bXktcmVwbGljYS1zZXQ='
 
     this.jwt = {
       privateKey:

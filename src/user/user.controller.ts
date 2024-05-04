@@ -1,7 +1,7 @@
 import Context from '../core/context/context.js'
 import Logger from '../core/logger/index.js'
 import { TypeRoute } from '../core/router/typed-router.js'
-import { ParamsSchema } from './user.schema.js'
+import { ParamsSchema, ProfileSchema } from './user.schema.js'
 import { UserService } from './user.service.js'
 
 export class UserController {
@@ -44,6 +44,21 @@ export class UserController {
       const result = await this.userService.delete(ctx, params.id)
       return {
         message: 'User deleted',
+        data: result,
+      }
+    })
+
+  updateProfile = this.route
+    .patch('/profile/:id')
+    .params(ParamsSchema)
+    .body(ProfileSchema)
+    .handler(async ({ params, body }) => {
+      const ctx = Context.get()
+      const logger = this.logger.Logger(ctx)
+      logger.info(`${UserController.name} - ${this.updateProfile.method}`)
+      const result = await this.userService.updateProfile(ctx, params.id, body)
+      return {
+        message: 'User updated',
         data: result,
       }
     })

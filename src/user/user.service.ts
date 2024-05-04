@@ -45,6 +45,15 @@ export class UserService {
     return result
   }
 
+  updateProfile = async <T extends object>(ctx: IContext, id: string, data: T) => {
+    const logger = this.logger.Logger(ctx)
+    const cmd = `${UserService.name}_${this.updateProfile.name}`
+    logger.info(`${cmd} - id`, { id })
+    const result = await this.userRepository.updateProfile(ctx, id, data)
+
+    return result
+  }
+
   private mappingResponse(user: IUserResponse) {
     const { id, name, email } = user
     return {
