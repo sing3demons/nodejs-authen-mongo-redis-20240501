@@ -43,10 +43,17 @@ export class AuthService {
 
     const access_token = this.generateToken(user)
     const refresh_token = this.generateRefreshToken(user)
+    const data = {
+      access_token,
+      refresh_token,
+      email: user.email,
+      createdAt: new Date(),
+    }
 
     const saveRedis = await this.redisClient.setEx(refresh_token, 'true', 60 * 60)
+    const session = await this.authRepository.upsertSession(ctx, user.email, data)
 
-    logger.info(`${cmd} - saveRedis`, saveRedis)
+    logger.info(`${cmd} - login`, { saveRedis, ...session })
     return { access_token, refresh_token }
   }
 
@@ -99,16 +106,27 @@ export class AuthService {
       throw new UnauthorizedError('Invalid token')
     }
 
-    const user = await this.authRepository.findByEmail(ctx, decode.username)
-    if (!user) {
-      throw new NotFoundError('User not found')
+    const [exitSession, user] = await Promise.all([
+      this.authRepository.findSession(ctx, decode.username),
+      this.authRepository.findByEmail(ctx, decode.username),
+    ])
+    if (!user || !exitSession) {
+      throw new NotFoundError('not found')
     }
 
     const access_token = this.generateToken(user)
     const refresh_token = this.generateRefreshToken(user)
 
-    const saveRedis = await this.redisClient.setEx(refresh_token, 'true', 60 * 60)
-    logger.info(`${cmd} - saveRedis`, saveRedis)
+    const [saveRedis, session] = await Promise.all([
+      this.redisClient.setEx(refresh_token, 'true', 60 * 60),
+      this.authRepository.upsertSession(ctx, user.email, {
+        access_token,
+        refresh_token,
+        email: user.email,
+        createdAt: new Date(),
+      }),
+    ])
+    logger.info(`${cmd} - saveRedis`, { saveRedis, ...session })
 
     return {
       access_token,
@@ -157,6 +175,7 @@ export class AuthService {
 
     return jwt.sign(payload, secretOrPrivateKey, options)
   }
+
   private verifyToken(token: string) {
     const secret = config.jwt.refreshPublicKey
     if (!secret) {
@@ -165,6 +184,35 @@ export class AuthService {
     const secretOrPrivateKey = Buffer.from(secret, 'base64')
     try {
       return jwt.verify(token, secretOrPrivateKey) as PayloadToken
+    } catch (err) {
+      throw new UnauthorizedError('Invalid token')
+    }
+  }
+
+  async validateToken(ctx: IContext, token: string) {
+    const logger = this.logger.Logger(ctx)
+    const secret = config.jwt.publicKey
+    if (!secret) {
+      throw new UnauthorizedError('Invalid token')
+    }
+    const secretOrPrivateKey = Buffer.from(secret, 'base64')
+    try {
+      const result = jwt.verify(token, secretOrPrivateKey) as PayloadToken
+      logger.info(`${AuthService.name}_${this.validateToken.name} - result`, result)
+
+      if (!result.username) {
+        throw new UnauthorizedError('Invalid token')
+      }
+
+      const session = await this.authRepository.findSession(ctx, result.username)
+      if (!session) {
+        throw new UnauthorizedError('Invalid token')
+      }
+      return {
+        userId: result.sub,
+        role: result.role,
+        username: result.username,
+      }
     } catch (err) {
       throw new UnauthorizedError('Invalid token')
     }

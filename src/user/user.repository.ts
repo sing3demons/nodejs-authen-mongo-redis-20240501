@@ -126,4 +126,29 @@ export class UserRepository {
       await session.endSession()
     }
   }
+
+  async upsertSession<T extends object>(ctx: IContext, username: string, data: T) {
+    const logger = this.logger.Logger(ctx)
+    logger.info(`${UserRepository.name} - ${this.upsertSession.name}`)
+
+    const filter = { username: username }
+    const result = await this.getCollection('sessions').findOneAndUpdate(
+      filter,
+      { $set: { id: ctx.session, payload: data, header: ctx, updatedAt: new Date() } },
+      { upsert: true, returnDocument: 'after' }
+    )
+
+    if (!result) {
+      throw new Error('Upsert session failed')
+    }
+    logger.info(`${UserRepository.name} - ${this.upsertSession.name} - result`, result)
+    return result
+  }
+
+  async findSession(ctx: IContext, username: string) {
+    const logger = this.logger.Logger(ctx)
+    logger.info(`${UserRepository.name} - ${this.findSession.name}`)
+    const filter = { username }
+    return await this.getCollection('sessions').findOne(filter)
+  }
 }

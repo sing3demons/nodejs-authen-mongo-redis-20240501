@@ -5,6 +5,7 @@ import { TypeRoute } from '../core/router/index.js'
 import { LoginSchema } from './auth.model.js'
 import { AuthService } from './auth.service.js'
 import { UserSchema } from '../user/user.schema.js'
+import { UnauthorizedError } from '../core/router/errors.js'
 
 export class AuthController {
   constructor(
@@ -61,4 +62,28 @@ export class AuthController {
         data: result,
       }
     })
+
+  verifyToken = this.route.get('/verifyToken').handler(async ({ req }) => {
+    const ctx = Context.get()
+    const logger = this.logger.Logger(ctx)
+    const authHeader = req.header('authorization')
+    if (!authHeader) {
+      throw new UnauthorizedError('Token not found')
+    }
+    console.log('=========================>authHeader', authHeader)
+    const [bearer, token] = authHeader.split(' ')
+    if (bearer !== 'Bearer') {
+      throw new UnauthorizedError('Invalid token')
+    }
+    if (!token) {
+      throw new UnauthorizedError('Token not found')
+    }
+    const data = await this.authService.validateToken(ctx, token)
+    logger.info(`${AuthController.name} - verifyToken`, data)
+    return {
+      success: true,
+      statusCode: 200,
+      message: 'success',
+    }
+  })
 }
