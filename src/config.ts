@@ -14,7 +14,7 @@ class Config {
   mongo_url: string
 
   constructor() {
-    this.port = process.env.PORT ?? 3000
+    this.port = process.env.PORT ?? 2567
     this.host = process.env.HOST_IP ?? ip.address()
     this.redis_url = process.env.REDIS_URL ?? `redis://${ip.address()}:6379`
     this.mongo_url =
